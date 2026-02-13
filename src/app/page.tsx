@@ -1,10 +1,11 @@
 import { Suspense } from "react";
 import { SearchForm } from "@/components/search-form";
 import { RepositoryList } from "@/components/repository-list";
+import { Pagination } from "@/components/pagination";
 import { searchRepositories } from "@/lib/github";
 
 interface HomeProps {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; page?: string }>;
 }
 
 /**
@@ -14,6 +15,7 @@ interface HomeProps {
 export default async function Home({ searchParams }: HomeProps) {
   const params = await searchParams;
   const query = params.q || "";
+  const page = Number(params.page) || 1;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -34,11 +36,8 @@ export default async function Home({ searchParams }: HomeProps) {
         </div>
 
         {/* 検索結果 */}
-        <Suspense
-          key={query}
-          fallback={<LoadingSkeleton />}
-        >
-          <SearchResults query={query} />
+        <Suspense key={`${query}-${page}`} fallback={<LoadingSkeleton />}>
+          <SearchResults query={query} page={page} />
         </Suspense>
       </div>
     </div>
@@ -48,7 +47,7 @@ export default async function Home({ searchParams }: HomeProps) {
 /**
  * 検索結果を表示するServer Component
  */
-async function SearchResults({ query }: { query: string }) {
+async function SearchResults({ query, page }: { query: string; page: number }) {
   if (!query) {
     return (
       <div className="text-center py-12 text-gray-500 dark:text-gray-400">
@@ -57,25 +56,22 @@ async function SearchResults({ query }: { query: string }) {
     );
   }
 
-  try {
-    const data = await searchRepositories(query);
+  // データ取得（エラーは自然にスロー）
+  const data = await searchRepositories(query, page);
 
-    return (
-      <div>
-        <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-          {data.total_count.toLocaleString()} 件の結果が見つかりました
-        </div>
-        <RepositoryList repositories={data.items} />
+  return (
+    <div>
+      <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
+        {data.total_count.toLocaleString()} 件の結果が見つかりました
       </div>
-    );
-  } catch (error) {
-    return (
-      <div className="text-center py-12 text-red-600 dark:text-red-400">
-        エラーが発生しました:{" "}
-        {error instanceof Error ? error.message : "不明なエラー"}
-      </div>
-    );
-  }
+      <RepositoryList repositories={data.items} />
+      <Pagination
+        currentPage={page}
+        totalCount={data.total_count}
+        perPage={30}
+      />
+    </div>
+  );
 }
 
 /**
