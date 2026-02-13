@@ -1,7 +1,7 @@
 import Image from "next/image";
-import Link from "next/link";
 import { getRepository } from "@/lib/github";
 import { notFound } from "next/navigation";
+import { BackButton } from "./back-button";
 
 interface RepositoryPageProps {
   params: Promise<{
@@ -29,12 +29,7 @@ export default async function RepositoryPage({ params }: RepositoryPageProps) {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="mx-auto max-w-4xl px-4 py-8">
         {/* ナビゲーション */}
-        <Link
-          href="/"
-          className="mb-6 inline-flex items-center text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300"
-        >
-          ← 検索に戻る
-        </Link>
+        <BackButton />
 
         {/* リポジトリ情報 */}
         <div className="rounded-lg border border-gray-200 bg-white p-8 dark:border-gray-700 dark:bg-gray-800">

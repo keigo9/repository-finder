@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import { GitHubRepository } from "@/lib/github";
 
 interface RepositoryListProps {
@@ -7,7 +10,7 @@ interface RepositoryListProps {
 }
 
 /**
- * リポジトリ一覧表示コンポーネント（Server Component）
+ * リポジトリ一覧表示コンポーネント（Client Component）
  */
 export function RepositoryList({ repositories }: RepositoryListProps) {
   if (repositories.length === 0) {
@@ -28,12 +31,22 @@ export function RepositoryList({ repositories }: RepositoryListProps) {
 }
 
 /**
- * リポジトリカードコンポーネント（Server Component）
+ * リポジトリカードコンポーネント（Client Component）
  */
 function RepositoryCard({ repository }: { repository: GitHubRepository }) {
+  const searchParams = useSearchParams();
+
+  const handleClick = () => {
+    // 検索状態を sessionStorage に保存
+    const query = searchParams.get("q") || "";
+    const page = searchParams.get("page") || "";
+    sessionStorage.setItem("searchState", JSON.stringify({ query, page }));
+  };
+
   return (
     <Link
       href={`/repository/${repository.owner.login}/${repository.name}`}
+      onClick={handleClick}
       className="block rounded-lg border border-gray-200 bg-white p-6 transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-gray-800 w-full overflow-hidden"
     >
       <div className="flex items-start gap-4">
