@@ -71,11 +71,7 @@ export default async function RepositoryPage({ params }: RepositoryPageProps) {
               label="Watchers"
               value={repository.watchers_count}
             />
-            <StatCard
-              icon="🍴"
-              label="Forks"
-              value={repository.forks_count}
-            />
+            <StatCard icon="🍴" label="Forks" value={repository.forks_count} />
             <StatCard
               icon="🐛"
               label="Issues"
