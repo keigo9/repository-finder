@@ -16,7 +16,9 @@ export function BackButton() {
       try {
         const { query, page } = JSON.parse(savedState);
         if (query) {
-          setBackUrl(`/?q=${encodeURIComponent(query)}${page ? `&page=${page}` : ""}`);
+          setBackUrl(
+            `/?q=${encodeURIComponent(query)}${page ? `&page=${page}` : ""}`
+          );
         }
       } catch (e) {
         console.error("Failed to parse search state:", e);
