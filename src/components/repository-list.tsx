@@ -34,7 +34,7 @@ function RepositoryCard({ repository }: { repository: GitHubRepository }) {
   return (
     <Link
       href={`/repository/${repository.owner.login}/${repository.name}`}
-      className="block rounded-lg border border-gray-200 bg-white p-6 transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-gray-800"
+      className="block rounded-lg border border-gray-200 bg-white p-6 transition-shadow hover:shadow-md dark:border-gray-700 dark:bg-gray-800 w-full overflow-hidden"
     >
       <div className="flex items-start gap-4">
         {/* オーナーのアイコン */}
@@ -48,7 +48,7 @@ function RepositoryCard({ repository }: { repository: GitHubRepository }) {
 
         <div className="flex-1 min-w-0">
           {/* リポジトリ名 */}
-          <h3 className="text-xl font-semibold text-blue-600 dark:text-blue-400">
+          <h3 className="text-xl font-semibold text-blue-600 dark:text-blue-400 truncate overflow-hidden">
             {repository.full_name}
           </h3>
 
