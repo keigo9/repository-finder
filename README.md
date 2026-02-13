@@ -1,36 +1,179 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# GitHub Repository Finder
 
-## Getting Started
+GitHub のリポジトリを検索できるウェブアプリケーション 🔍✨
 
-First, run the development server:
+## 概要
+
+このプロジェクトは、GitHub API を使用してリポジトリを検索し、詳細情報を表示するウェブアプリケーションです。
+Next.js 14+ の App Router を活用し、モダンな技術スタックで構築されています。
+
+## 主な機能
+
+- 🔍 **リポジトリ検索**: キーワードでGitHubリポジトリを検索
+- 📊 **詳細情報表示**: スター数、フォーク数、Issue数などの統計情報
+- ⚡ **高速なレスポンス**: Next.js のキャッシュ戦略を活用
+- 🎨 **レスポンシブデザイン**: モバイルにも対応
+- 🌙 **ダークモード対応**: ライト/ダークテーマに対応
+
+## 技術スタック
+
+### フレームワーク・ライブラリ
+
+- **Next.js 16.1+**: React フレームワーク（App Router使用）
+- **React 19**: UI ライブラリ
+- **TypeScript**: 型安全な開発
+
+### スタイリング
+
+- **Tailwind CSS 4**: ユーティリティファーストの CSS フレームワーク
+
+### 開発ツール
+
+- **ESLint**: コード品質チェック
+- **Prettier**: コードフォーマッター
+- **Jest**: テストフレームワーク
+- **React Testing Library**: React コンポーネントのテスト
+
+### CI/CD
+
+- **GitHub Actions**: 自動テストとビルド
+
+## プロジェクト構成
+
+```
+.
+├── src/
+│   ├── app/                      # Next.js App Router
+│   │   ├── page.tsx             # ホームページ（検索ページ）
+│   │   └── repository/          # リポジトリ詳細ページ
+│   │       └── [owner]/[repo]/
+│   │           ├── page.tsx     # 詳細ページ
+│   │           ├── loading.tsx  # ローディング UI
+│   │           └── not-found.tsx # 404 ページ
+│   ├── components/              # コンポーネント
+│   │   ├── search-form.tsx      # 検索フォーム (Client Component)
+│   │   └── repository-list.tsx  # リポジトリ一覧 (Server Component)
+│   └── lib/                     # ユーティリティ
+│       └── github.ts            # GitHub API クライアント
+├── jest.config.ts               # Jest 設定
+└── .github/
+    └── workflows/
+        └── test.yml             # GitHub Actions ワークフロー
+```
+
+## セットアップ
+
+### 必要な環境
+
+- Node.js 20 以上
+- npm または yarn
+
+### インストール
+
+```bash
+# リポジトリをクローン
+git clone <repository-url>
+cd repository-finder
+
+# 依存関係をインストール
+npm install
+```
+
+### 開発サーバーの起動
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+ブラウザで [http://localhost:3000](http://localhost:3000) を開くと、アプリケーションが表示されます。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## スクリプト
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# 開発サーバー起動
+npm run dev
 
-## Learn More
+# ビルド
+npm run build
 
-To learn more about Next.js, take a look at the following resources:
+# 本番サーバー起動
+npm start
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Linter 実行
+npm run lint
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Linter 実行（自動修正）
+npm run lint:fix
 
-## Deploy on Vercel
+# フォーマット実行
+npm run format
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# フォーマットチェック
+npm run format:check
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# テスト実行
+npm test
+
+# テスト実行（watch モード）
+npm run test:watch
+```
+
+## Next.js App Router の活用ポイント
+
+### Server Components
+
+- `app/page.tsx`: 検索結果を Server Component で取得
+- `components/repository-list.tsx`: リポジトリ一覧を Server Component で描画
+
+### Client Components
+
+- `components/search-form.tsx`: 検索フォームは Client Component（`useRouter`, `useState` を使用）
+
+### キャッシュ戦略
+
+GitHub API のリクエストに Next.js の `revalidate` オプションを使用:
+
+- 検索結果: 5分間キャッシュ（`revalidate: 300`）
+- リポジトリ詳細: 10分間キャッシュ（`revalidate: 600`）
+
+### Dynamic Routes
+
+- `/repository/[owner]/[repo]`: Dynamic Route でリポジトリ詳細ページを実装
+
+### Streaming & Suspense
+
+- `Suspense` でローディング UI を表示
+- スケルトン UI でユーザー体験を向上
+
+## テスト
+
+全てのコアロジックとコンポーネントにテストを実装しています:
+
+- `src/lib/__tests__/github.test.ts`: GitHub API クライアントのテスト
+- `src/components/__tests__/repository-list.test.tsx`: コンポーネントのテスト
+
+## CI/CD
+
+GitHub Actions で以下を自動実行:
+
+- Linter チェック
+- フォーマットチェック
+- テスト実行
+- ビルド確認
+
+main ブランチへの Pull Request および push 時に実行されます。
+
+## AI の使用について
+
+このプロジェクトの実装には、Claude Code（Anthropic の AI アシスタント）を使用しました。
+コードの生成、テストの作成、ドキュメント作成などを AI の支援を受けて行っています。
+
+## ライセンス
+
+MIT
+
+## 作成者
+
+作成日: 2026年2月13日
+
+🤖 Generated with [Claude Code](https://claude.com/claude-code)
