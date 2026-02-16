@@ -1,6 +1,7 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 interface PaginationProps {
   currentPage: number;
@@ -16,7 +17,6 @@ export function Pagination({
   totalCount,
   perPage,
 }: PaginationProps) {
-  const router = useRouter();
   const searchParams = useSearchParams();
   // GitHub API は検索結果を最大1000件までしか返さない
   const maxResults = 1000;
@@ -25,10 +25,10 @@ export function Pagination({
     Math.ceil(maxResults / perPage)
   );
 
-  const goToPage = (page: number) => {
+  const getHref = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", page.toString());
-    router.push(`/?${params.toString()}`);
+    return `/?${params.toString()}`;
   };
 
   // ページ番号のボタンを生成
@@ -79,13 +79,18 @@ export function Pagination({
   return (
     <div className="mt-8 flex items-center justify-center gap-2">
       {/* 前へボタン */}
-      <button
-        onClick={() => goToPage(currentPage - 1)}
-        disabled={currentPage === 1}
-        className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:hover:bg-gray-800"
-      >
-        ← 前へ
-      </button>
+      {currentPage === 1 ? (
+        <span className="cursor-not-allowed rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium opacity-50 dark:border-gray-600">
+          ← 前へ
+        </span>
+      ) : (
+        <Link
+          href={getHref(currentPage - 1)}
+          className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800"
+        >
+          ← 前へ
+        </Link>
+      )}
 
       {/* ページ番号 */}
       <div className="flex gap-1">
@@ -104,30 +109,38 @@ export function Pagination({
           const pageNum = page as number;
           const isActive = pageNum === currentPage;
 
-          return (
-            <button
+          return isActive ? (
+            <span
               key={pageNum}
-              onClick={() => goToPage(pageNum)}
-              className={`h-10 w-10 rounded-lg text-sm font-medium transition-colors ${
-                isActive
-                  ? "bg-blue-600 text-white dark:bg-blue-500"
-                  : "border border-gray-300 hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800"
-              }`}
+              className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-600 text-sm font-medium text-white dark:bg-blue-500"
             >
               {pageNum}
-            </button>
+            </span>
+          ) : (
+            <Link
+              key={pageNum}
+              href={getHref(pageNum)}
+              className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 text-sm font-medium transition-colors hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800"
+            >
+              {pageNum}
+            </Link>
           );
         })}
       </div>
 
       {/* 次へボタン */}
-      <button
-        onClick={() => goToPage(currentPage + 1)}
-        disabled={currentPage === totalPages}
-        className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:hover:bg-gray-800"
-      >
-        次へ →
-      </button>
+      {currentPage === totalPages ? (
+        <span className="cursor-not-allowed rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium opacity-50 dark:border-gray-600">
+          次へ →
+        </span>
+      ) : (
+        <Link
+          href={getHref(currentPage + 1)}
+          className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800"
+        >
+          次へ →
+        </Link>
+      )}
     </div>
   );
 }
