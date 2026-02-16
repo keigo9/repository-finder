@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 // カスタムエラークラス
 export class GitHubNotFoundError extends Error {
   constructor(message: string) {
@@ -16,31 +18,42 @@ export class GitHubAPIError extends Error {
   }
 }
 
-// GitHub API のレスポンス型定義
-export interface GitHubRepository {
-  id: number;
-  name: string;
-  full_name: string;
-  owner: {
-    login: string;
-    avatar_url: string;
-  };
-  description: string | null;
-  language: string | null;
-  stargazers_count: number;
-  watchers_count: number;
-  forks_count: number;
-  open_issues_count: number;
-  html_url: string;
-  created_at: string;
-  updated_at: string;
+export class GitHubValidationError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "GitHubValidationError";
+  }
 }
 
-export interface GitHubSearchResponse {
-  total_count: number;
-  incomplete_results: boolean;
-  items: GitHubRepository[];
-}
+// Zod スキーマによる型定義とランタイムバリデーション
+const GitHubRepositorySchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  full_name: z.string(),
+  owner: z.object({
+    login: z.string(),
+    avatar_url: z.string(),
+  }),
+  description: z.string().nullable(),
+  language: z.string().nullable(),
+  stargazers_count: z.number(),
+  watchers_count: z.number(),
+  forks_count: z.number(),
+  open_issues_count: z.number(),
+  html_url: z.string(),
+  created_at: z.string(),
+  updated_at: z.string(),
+});
+
+const GitHubSearchResponseSchema = z.object({
+  total_count: z.number(),
+  incomplete_results: z.boolean(),
+  items: z.array(GitHubRepositorySchema),
+});
+
+// Zod スキーマから型を導出
+export type GitHubRepository = z.infer<typeof GitHubRepositorySchema>;
+export type GitHubSearchResponse = z.infer<typeof GitHubSearchResponseSchema>;
 
 const GITHUB_API_BASE = "https://api.github.com";
 
@@ -101,7 +114,19 @@ export async function searchRepositories(
     throw new GitHubAPIError(errorMessage, response.status);
   }
 
-  return response.json();
+  const data = await response.json();
+
+  // Zod によるランタイムバリデーション
+  const validationResult = GitHubSearchResponseSchema.safeParse(data);
+
+  if (!validationResult.success) {
+    console.error("GitHub API レスポンスの検証エラー:", validationResult.error);
+    throw new GitHubValidationError(
+      "GitHub API からの応答が期待される形式と異なります"
+    );
+  }
+
+  return validationResult.data;
 }
 
 /**
@@ -151,5 +176,17 @@ export async function getRepository(
     throw new GitHubAPIError(errorMessage, response.status);
   }
 
-  return response.json();
+  const data = await response.json();
+
+  // Zod によるランタイムバリデーション
+  const validationResult = GitHubRepositorySchema.safeParse(data);
+
+  if (!validationResult.success) {
+    console.error("GitHub API レスポンスの検証エラー:", validationResult.error);
+    throw new GitHubValidationError(
+      "GitHub API からの応答が期待される形式と異なります"
+    );
+  }
+
+  return validationResult.data;
 }
