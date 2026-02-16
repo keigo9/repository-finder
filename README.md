@@ -79,6 +79,29 @@ cd repository-finder
 npm install
 ```
 
+### 環境変数の設定（任意）
+
+GitHub API のレート制限を改善するために、Personal Access Token の設定を推奨します。
+
+```bash
+# .env.local.example をコピー
+cp .env.local.example .env.local
+
+# .env.local を編集して GITHUB_TOKEN を設定
+# GITHUB_TOKEN=ghp_xxxxxxxxxxxx
+```
+
+**GitHub Personal Access Token の取得方法:**
+1. https://github.com/settings/tokens にアクセス
+2. "Generate new token" → "Generate new token (classic)" を選択
+3. スコープで `public_repo` のみにチェック
+4. トークンを生成してコピー
+5. `.env.local` の `GITHUB_TOKEN` に貼り付け
+
+**レート制限の改善:**
+- 未認証: 60 req/hour
+- **認証あり: 5000 req/hour** ← 推奨！
+
 ### 開発サーバーの起動
 
 ```bash

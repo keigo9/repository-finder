@@ -74,10 +74,18 @@ export async function searchRepositories(
   url.searchParams.set("sort", "stars");
   url.searchParams.set("order", "desc");
 
+  const headers: HeadersInit = {
+    Accept: "application/vnd.github.v3+json",
+  };
+
+  // GitHub Personal Access Token が設定されている場合は認証ヘッダーを追加
+  // レート制限が 60 req/hour → 5000 req/hour に向上
+  if (process.env.GITHUB_TOKEN) {
+    headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+  }
+
   const response = await fetch(url.toString(), {
-    headers: {
-      Accept: "application/vnd.github.v3+json",
-    },
+    headers,
     // Next.js のキャッシュ戦略: 検索結果は5分間キャッシュ
     next: {
       revalidate: 300,
@@ -112,10 +120,17 @@ export async function getRepository(
 
   const url = `${GITHUB_API_BASE}/repos/${owner}/${repo}`;
 
+  const headers: HeadersInit = {
+    Accept: "application/vnd.github.v3+json",
+  };
+
+  // GitHub Personal Access Token が設定されている場合は認証ヘッダーを追加
+  if (process.env.GITHUB_TOKEN) {
+    headers.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
+  }
+
   const response = await fetch(url, {
-    headers: {
-      Accept: "application/vnd.github.v3+json",
-    },
+    headers,
     // Next.js のキャッシュ戦略: リポジトリ詳細は10分間キャッシュ
     next: {
       revalidate: 600,
