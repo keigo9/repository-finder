@@ -57,6 +57,8 @@ export async function searchRepositories(
   page: number = 1,
   perPage: number = 30
 ): Promise<GitHubSearchResponse> {
+  "use cache";
+
   if (!query.trim()) {
     return {
       total_count: 0,
@@ -106,6 +108,8 @@ export async function getRepository(
   owner: string,
   repo: string
 ): Promise<GitHubRepository> {
+  "use cache";
+
   const url = `${GITHUB_API_BASE}/repos/${owner}/${repo}`;
 
   const response = await fetch(url, {

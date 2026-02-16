@@ -1,6 +1,9 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    cacheComponents: true, // Partial Prerendering を有効化 (Next.js 16+)
+  },
   images: {
     remotePatterns: [
       {

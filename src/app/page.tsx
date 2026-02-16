@@ -10,29 +10,51 @@ interface HomeProps {
 
 /**
  * ホームページ（検索ページ）
+ *
+ * PPR (Partial Prerendering) により以下のように最適化される：
+ * 1. Header（静的）→ ビルド時に事前レンダリング
+ * 2. SearchForm（Client Component + Suspense）→ useSearchParams が動的データのため Suspense で囲む
+ * 3. SearchResults（Suspense）→ 動的データをストリーミングで段階的に配信
+ *
+ * Next.js 16 では useSearchParams() などの動的データアクセスも Suspense が必要
  */
-export default async function Home({ searchParams }: HomeProps) {
-  const params = await searchParams;
-  const query = params.q || "";
-  const page = Number(params.page) || 1;
-
+export default function Home({ searchParams }: HomeProps) {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="mx-auto max-w-4xl px-4 py-8">
+        {/* 静的コンテンツ：PPR により事前レンダリング */}
         <Header />
 
-        {/* 検索フォーム */}
+        {/* Client Component：useSearchParams を使用するため Suspense で囲む */}
         <div className="mb-8">
-          <SearchForm />
+          <Suspense fallback={<SearchFormSkeleton />}>
+            <SearchForm />
+          </Suspense>
         </div>
 
-        {/* 検索結果 */}
-        <Suspense key={`${query}-${page}`} fallback={<LoadingSkeleton />}>
-          <SearchResults query={query} page={page} />
+        {/* 動的コンテンツ：searchParams の await と検索結果を Suspense 内で処理 */}
+        <Suspense fallback={<LoadingSkeleton />}>
+          <SearchResultsWrapper searchParams={searchParams} />
         </Suspense>
       </div>
     </div>
   );
+}
+
+/**
+ * 検索結果ラッパー
+ * searchParams を await して SearchResults に渡す
+ */
+async function SearchResultsWrapper({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; page?: string }>;
+}) {
+  const params = await searchParams;
+  const query = params.q || "";
+  const page = Number(params.page) || 1;
+
+  return <SearchResults query={query} page={page} />;
 }
 
 /**
@@ -83,7 +105,19 @@ async function SearchResults({ query, page }: { query: string; page: number }) {
 }
 
 /**
- * ローディング中のスケルトンUI
+ * 検索フォームのローディングスケルトン
+ */
+function SearchFormSkeleton() {
+  return (
+    <div className="flex gap-2">
+      <div className="h-10 flex-1 animate-pulse rounded-lg bg-gray-300 dark:bg-gray-600"></div>
+      <div className="h-10 w-20 animate-pulse rounded-lg bg-gray-300 dark:bg-gray-600"></div>
+    </div>
+  );
+}
+
+/**
+ * 検索結果のローディングスケルトン
  */
 function LoadingSkeleton() {
   return (

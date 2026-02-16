@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Image from "next/image";
 import {
   getRepository,
@@ -21,6 +22,32 @@ interface RepositoryPageProps {
 export default async function RepositoryPage({ params }: RepositoryPageProps) {
   const { owner, repo } = await params;
 
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="mx-auto max-w-4xl px-4 py-8">
+        <BackButton />
+
+        {/* PPR により BackButton は静的シェルとして先にレンダリングされ、
+            リポジトリデータはストリーミングされる */}
+        <Suspense fallback={<RepositoryLoadingSkeleton />}>
+          <RepositoryContent owner={owner} repo={repo} />
+        </Suspense>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * リポジトリコンテンツを表示するServer Component
+ * エラーは自然にスローされ、error.tsx または not-found.tsx でキャッチされる
+ */
+async function RepositoryContent({
+  owner,
+  repo,
+}: {
+  owner: string;
+  repo: string;
+}) {
   let repository;
   try {
     // リポジトリ取得
@@ -35,17 +62,11 @@ export default async function RepositoryPage({ params }: RepositoryPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="mx-auto max-w-4xl px-4 py-8">
-        <BackButton />
-
-        <div className="rounded-lg border border-gray-200 bg-white p-8 dark:border-gray-700 dark:bg-gray-800">
-          <RepositoryHeader repository={repository} />
-          <RepositoryStats repository={repository} />
-          <RepositoryDetails repository={repository} />
-          <RepositoryActions repository={repository} />
-        </div>
-      </div>
+    <div className="rounded-lg border border-gray-200 bg-white p-8 dark:border-gray-700 dark:bg-gray-800">
+      <RepositoryHeader repository={repository} />
+      <RepositoryStats repository={repository} />
+      <RepositoryDetails repository={repository} />
+      <RepositoryActions repository={repository} />
     </div>
   );
 }
@@ -186,6 +207,52 @@ function InfoRow({
         {label}
       </div>
       <div className="flex-1 text-gray-900 dark:text-white">{children}</div>
+    </div>
+  );
+}
+
+/**
+ * リポジトリ詳細ページのローディングスケルトン
+ */
+function RepositoryLoadingSkeleton() {
+  return (
+    <div className="animate-pulse rounded-lg border border-gray-200 bg-white p-8 dark:border-gray-700 dark:bg-gray-800">
+      <div className="mb-6 flex items-start gap-6">
+        <div className="h-20 w-20 shrink-0 rounded-full bg-gray-300 dark:bg-gray-600"></div>
+        <div className="flex-1 space-y-3">
+          <div className="h-8 w-3/4 rounded bg-gray-300 dark:bg-gray-600"></div>
+          <div className="h-6 w-full rounded bg-gray-300 dark:bg-gray-600"></div>
+        </div>
+      </div>
+
+      <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
+          <div
+            key={i}
+            className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900"
+          >
+            <div className="mx-auto h-8 w-8 rounded bg-gray-300 dark:bg-gray-600"></div>
+            <div className="mt-2 h-8 rounded bg-gray-300 dark:bg-gray-600"></div>
+            <div className="mt-1 h-4 rounded bg-gray-300 dark:bg-gray-600"></div>
+          </div>
+        ))}
+      </div>
+
+      <div className="space-y-4">
+        {[...Array(3)].map((_, i) => (
+          <div
+            key={i}
+            className="flex gap-4 border-t border-gray-200 py-3 dark:border-gray-700"
+          >
+            <div className="h-4 w-24 rounded bg-gray-300 dark:bg-gray-600"></div>
+            <div className="h-4 flex-1 rounded bg-gray-300 dark:bg-gray-600"></div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-8">
+        <div className="h-12 w-40 rounded-lg bg-gray-300 dark:bg-gray-600"></div>
+      </div>
     </div>
   );
 }
