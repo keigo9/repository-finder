@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { SearchForm } from "@/components/common/search-form";
 import { RepositoryList } from "@/components/home/repository-list";
 import { Pagination } from "@/components/common/pagination";
+import { ErrorMessage } from "@/components/common/error-message";
 import { searchRepositories } from "@/lib/github";
 
 interface HomeProps {
@@ -56,18 +57,23 @@ async function SearchResults({ query, page }: { query: string; page: number }) {
     );
   }
 
-  // データ取得（エラーは自然にスロー）
-  const data = await searchRepositories(query, page);
+  // データ取得（エラーハンドリング付き）
+  const result = await searchRepositories(query, page);
+
+  // エラー状態の処理
+  if (!result.success) {
+    return <ErrorMessage message={result.error} />;
+  }
 
   return (
     <div>
       <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-        {data.total_count.toLocaleString()} 件の結果が見つかりました
+        {result.data.total_count.toLocaleString()} 件の結果が見つかりました
       </div>
-      <RepositoryList repositories={data.items} />
+      <RepositoryList repositories={result.data.items} />
       <Pagination
         currentPage={page}
-        totalCount={data.total_count}
+        totalCount={result.data.total_count}
         perPage={30}
       />
     </div>
