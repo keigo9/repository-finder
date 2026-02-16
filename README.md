@@ -1,202 +1,69 @@
 # GitHub Repository Finder
 
-GitHub のリポジトリを検索できるウェブアプリケーション 🔍✨
+GitHub のリポジトリを検索・詳細表示できるウェブアプリケーション 🔍✨
 
 ## 概要
 
-このプロジェクトは、GitHub API を使用してリポジトリを検索し、詳細情報を表示するウェブアプリケーションです。
-Next.js 14+ の App Router を活用し、モダンな技術スタックで構築されています。
-
-## 主な機能
-
-- 🔍 **リポジトリ検索**: キーワードでGitHubリポジトリを検索
-- 📊 **詳細情報表示**: スター数、フォーク数、Issue数などの統計情報
-- ⚡ **高速なレスポンス**: Next.js のキャッシュ戦略を活用
-- 🎨 **レスポンシブデザイン**: モバイルにも対応
-- 🌙 **ダークモード対応**: ライト/ダークテーマに対応
-
-## 技術スタック
-
-### フレームワーク・ライブラリ
-
-- **Next.js 16.1+**: React フレームワーク（App Router使用）
-- **React 19**: UI ライブラリ
-- **TypeScript**: 型安全な開発
-
-### スタイリング
-
-- **Tailwind CSS 4**: ユーティリティファーストの CSS フレームワーク
-
-### 開発ツール
-
-- **ESLint**: コード品質チェック
-- **Prettier**: コードフォーマッター
-- **Jest**: テストフレームワーク
-- **React Testing Library**: React コンポーネントのテスト
-
-### CI/CD
-
-- **GitHub Actions**: 自動テストとビルド
-
-## プロジェクト構成
-
-```
-.
-├── src/
-│   ├── app/                      # Next.js App Router
-│   │   ├── page.tsx             # ホームページ（検索ページ）
-│   │   └── repository/          # リポジトリ詳細ページ
-│   │       └── [owner]/[repo]/
-│   │           ├── page.tsx     # 詳細ページ
-│   │           ├── loading.tsx  # ローディング UI
-│   │           └── not-found.tsx # 404 ページ
-│   ├── components/              # コンポーネント
-│   │   ├── search-form.tsx      # 検索フォーム (Client Component)
-│   │   └── repository-list.tsx  # リポジトリ一覧 (Server Component)
-│   └── lib/                     # ユーティリティ
-│       └── github.ts            # GitHub API クライアント
-├── jest.config.ts               # Jest 設定
-└── .github/
-    └── workflows/
-        └── test.yml             # GitHub Actions ワークフロー
-```
+GitHub API を使用してリポジトリを検索し、詳細情報を表示するウェブアプリケーション。
+Next.js 16 の App Router、Server Components、PPR（Partial Prerendering）などの最新機能を活用。
 
 ## セットアップ
 
-### 必要な環境
-
-- Node.js 20 以上
-- npm または yarn
-
-### インストール
+### 1. インストール
 
 ```bash
-# リポジトリをクローン
 git clone <repository-url>
 cd repository-finder
-
-# 依存関係をインストール
 npm install
 ```
 
-### 環境変数の設定（任意）
+### 2. 環境変数の設定（推奨）
 
-GitHub API のレート制限を改善するために、Personal Access Token の設定を推奨します。
+GitHub API のレート制限を改善するため、Personal Access Token の設定を推奨:
 
 ```bash
-# .env.local.example をコピー
 cp .env.local.example .env.local
-
-# .env.local を編集して GITHUB_TOKEN を設定
-# GITHUB_TOKEN=ghp_xxxxxxxxxxxx
+# .env.local に GITHUB_TOKEN を設定
 ```
 
-**GitHub Personal Access Token の取得方法:**
-1. https://github.com/settings/tokens にアクセス
-2. "Generate new token" → "Generate new token (classic)" を選択
-3. スコープで `public_repo` のみにチェック
-4. トークンを生成してコピー
-5. `.env.local` の `GITHUB_TOKEN` に貼り付け
+**トークン取得方法:**
 
-**レート制限の改善:**
+1. https://github.com/settings/tokens にアクセス
+2. "Generate new token (classic)" を選択
+3. スコープ: `public_repo` のみ
+4. 生成したトークンを `.env.local` に貼り付け
+
+**レート制限:**
+
 - 未認証: 60 req/hour
 - **認証あり: 5000 req/hour** ← 推奨！
 
-### 開発サーバーの起動
+### 3. 開発サーバー起動
 
 ```bash
 npm run dev
 ```
 
-ブラウザで [http://localhost:3000](http://localhost:3000) を開くと、アプリケーションが表示されます。
+http://localhost:3000 で起動 🚀
 
-## スクリプト
+## 主なコマンド
 
 ```bash
-# 開発サーバー起動
-npm run dev
-
-# ビルド
-npm run build
-
-# 本番サーバー起動
-npm start
-
-# Linter 実行
-npm run lint
-
-# Linter 実行（自動修正）
-npm run lint:fix
-
-# フォーマット実行
-npm run format
-
-# フォーマットチェック
-npm run format:check
-
-# テスト実行
-npm test
-
-# テスト実行（watch モード）
-npm run test:watch
+npm run dev          # 開発サーバー起動
+npm run build        # 本番ビルド
+npm run lint:fix     # Lint 自動修正
+npm run format       # コードフォーマット
+npm test             # テスト実行
 ```
 
-## Next.js App Router の活用ポイント
+## プロジェクトの詳細
 
-### Server Components
+- **[ACHIEVEMENTS.md](./ACHIEVEMENTS.md)** - 実装の工夫点・技術的な意思決定
+  - パフォーマンス最適化（PPR、キャッシュ戦略）
+  - セキュリティ対策（Zod バリデーション、CSP、DoS 対策）
+  - アクセシビリティ、SEO、UI/UX の工夫
+  - アーキテクチャ選定の理由（BFF 不採用、Tailwind 採用など）
 
-- `app/page.tsx`: 検索結果を Server Component で取得
-- `components/repository-list.tsx`: リポジトリ一覧を Server Component で描画
-
-### Client Components
-
-- `components/search-form.tsx`: 検索フォームは Client Component（`useRouter`, `useState` を使用）
-
-### キャッシュ戦略
-
-GitHub API のリクエストに Next.js の `revalidate` オプションを使用:
-
-- 検索結果: 5分間キャッシュ（`revalidate: 300`）
-- リポジトリ詳細: 10分間キャッシュ（`revalidate: 600`）
-
-### Dynamic Routes
-
-- `/repository/[owner]/[repo]`: Dynamic Route でリポジトリ詳細ページを実装
-
-### Streaming & Suspense
-
-- `Suspense` でローディング UI を表示
-- スケルトン UI でユーザー体験を向上
-
-## テスト
-
-全てのコアロジックとコンポーネントにテストを実装しています:
-
-- `src/lib/__tests__/github.test.ts`: GitHub API クライアントのテスト
-- `src/components/__tests__/repository-list.test.tsx`: コンポーネントのテスト
-
-## CI/CD
-
-GitHub Actions で以下を自動実行:
-
-- Linter チェック
-- フォーマットチェック
-- テスト実行
-- ビルド確認
-
-main ブランチへの Pull Request および push 時に実行されます。
-
-## AI の使用について
-
-このプロジェクトの実装には、Claude Code（Anthropic の AI アシスタント）を使用しました。
-コードの生成、テストの作成、ドキュメント作成などを AI の支援を受けて行っています。
-
-## ライセンス
-
-MIT
-
-## 作成者
-
-作成日: 2026年2月13日
-
-🤖 Generated with [Claude Code](https://claude.com/claude-code)
+- **[AI_INSTRUCTION.md](./AI_INSTRUCTION.md)** - Claude Code の活用方法
+  - 開発フローと指示方法
+  - 段階的な品質改善プロセス
