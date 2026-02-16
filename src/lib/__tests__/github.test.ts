@@ -68,10 +68,11 @@ describe("GitHub API クライアント", () => {
       (fetch as jest.Mock).mockResolvedValueOnce({
         ok: false,
         status: 404,
+        json: async () => ({}),
       });
 
       await expect(searchRepositories("test")).rejects.toThrow(
-        "GitHub API エラー: 404"
+        "GitHub API エラー (ステータス: 404)"
       );
     });
   });
@@ -119,10 +120,11 @@ describe("GitHub API クライアント", () => {
       (fetch as jest.Mock).mockResolvedValueOnce({
         ok: false,
         status: 404,
+        json: async () => ({}),
       });
 
       await expect(getRepository("owner", "not-found")).rejects.toThrow(
-        "GitHub API エラー: 404"
+        "GitHub API エラー (ステータス: 404)"
       );
     });
   });
