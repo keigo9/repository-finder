@@ -2,7 +2,6 @@ import { Suspense } from "react";
 import { SearchForm } from "@/components/common/search-form";
 import { RepositoryList } from "@/components/home/repository-list";
 import { Pagination } from "@/components/common/pagination";
-import { ErrorMessage } from "@/components/common/error-message";
 import { searchRepositories } from "@/lib/github";
 
 interface HomeProps {
@@ -47,33 +46,29 @@ export default async function Home({ searchParams }: HomeProps) {
 
 /**
  * 検索結果を表示するServer Component
+ * エラーは自然にスローされ、error.tsx でキャッチされる
  */
 async function SearchResults({ query, page }: { query: string; page: number }) {
   if (!query) {
     return (
-      <div className="text-center py-12 text-gray-500 dark:text-gray-400">
+      <div className="py-12 text-center text-gray-500 dark:text-gray-400">
         キーワードを入力して検索してね!
       </div>
     );
   }
 
-  // データ取得（エラーハンドリング付き）
-  const result = await searchRepositories(query, page);
-
-  // エラー状態の処理
-  if (!result.success) {
-    return <ErrorMessage message={result.error} />;
-  }
+  // データ取得（エラーは error.tsx でキャッチされる）
+  const data = await searchRepositories(query, page);
 
   return (
     <div>
       <div className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-        {result.data.total_count.toLocaleString()} 件の結果が見つかりました
+        {data.total_count.toLocaleString()} 件の結果が見つかりました
       </div>
-      <RepositoryList repositories={result.data.items} />
+      <RepositoryList repositories={data.items} />
       <Pagination
         currentPage={page}
-        totalCount={result.data.total_count}
+        totalCount={data.total_count}
         perPage={30}
       />
     </div>
