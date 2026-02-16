@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { validateEnv } from "./env";
 
 // カスタムエラークラス
 export class GitHubNotFoundError extends Error {
@@ -56,6 +57,8 @@ export type GitHubRepository = z.infer<typeof GitHubRepositorySchema>;
 export type GitHubSearchResponse = z.infer<typeof GitHubSearchResponseSchema>;
 
 const GITHUB_API_BASE = "https://api.github.com";
+// 検索クエリの最大文字数（DoS 攻撃対策）
+const MAX_QUERY_LENGTH = 256;
 
 /**
  * GitHub のリポジトリを検索する
@@ -63,6 +66,7 @@ const GITHUB_API_BASE = "https://api.github.com";
  * @param page ページ番号（デフォルト: 1）
  * @param perPage 1ページあたりの結果数（デフォルト: 30）
  * @returns 検索結果
+ * @throws {GitHubValidationError} 入力パラメータが不正な場合
  * @throws {GitHubAPIError} GitHub API エラー
  */
 export async function searchRepositories(
@@ -72,7 +76,13 @@ export async function searchRepositories(
 ): Promise<GitHubSearchResponse> {
   "use cache";
 
-  if (!query.trim()) {
+  // 環境変数の検証（初回のみ）
+  validateEnv();
+
+  const trimmedQuery = query.trim();
+
+  // 空のクエリは空の結果を返す
+  if (!trimmedQuery) {
     return {
       total_count: 0,
       incomplete_results: false,
@@ -80,8 +90,15 @@ export async function searchRepositories(
     };
   }
 
+  // クエリの長さ制限チェック（DoS 攻撃対策）
+  if (trimmedQuery.length > MAX_QUERY_LENGTH) {
+    throw new GitHubValidationError(
+      `検索クエリが長すぎます（最大: ${MAX_QUERY_LENGTH}文字）`
+    );
+  }
+
   const url = new URL(`${GITHUB_API_BASE}/search/repositories`);
-  url.searchParams.set("q", query);
+  url.searchParams.set("q", trimmedQuery);
   url.searchParams.set("page", page.toString());
   url.searchParams.set("per_page", perPage.toString());
   url.searchParams.set("sort", "stars");
@@ -142,6 +159,9 @@ export async function getRepository(
   repo: string
 ): Promise<GitHubRepository> {
   "use cache";
+
+  // 環境変数の検証（初回のみ）
+  validateEnv();
 
   const url = `${GITHUB_API_BASE}/repos/${owner}/${repo}`;
 

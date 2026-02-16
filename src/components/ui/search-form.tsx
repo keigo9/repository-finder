@@ -3,6 +3,9 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
+// 検索クエリの最大文字数（DoS 攻撃対策）
+const MAX_QUERY_LENGTH = 256;
+
 /**
  * リポジトリ検索フォームコンポーネント
  */
@@ -13,8 +16,9 @@ export function SearchForm() {
 
   const handleSubmit: React.SubmitEventHandler<HTMLFormElement> = (e) => {
     e.preventDefault();
-    if (query.trim()) {
-      router.push(`/?q=${encodeURIComponent(query.trim())}`);
+    const trimmedQuery = query.trim();
+    if (trimmedQuery && trimmedQuery.length <= MAX_QUERY_LENGTH) {
+      router.push(`/?q=${encodeURIComponent(trimmedQuery)}`);
     }
   };
 
@@ -28,6 +32,7 @@ export function SearchForm() {
           placeholder="リポジトリを検索..."
           className="flex-1 rounded-lg border border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:focus:border-blue-400"
           autoFocus
+          maxLength={MAX_QUERY_LENGTH}
         />
         <button
           type="submit"
