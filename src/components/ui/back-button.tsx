@@ -1,32 +1,32 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useEffect, useState } from "react";
 
 /**
  * 検索ページに戻るボタン（検索状態を保持）
  */
 export function BackButton() {
-  const backUrl = useMemo(() => {
-    if (typeof window === "undefined") {
-      return "/";
-    }
+  const [backUrl, setBackUrl] = useState("/");
 
+  useEffect(() => {
     const savedState = sessionStorage.getItem("searchState");
     if (!savedState) {
-      return "/";
+      return;
     }
 
     try {
       const { query, page } = JSON.parse(savedState);
       if (query) {
-        return `/?q=${encodeURIComponent(query)}${page ? `&page=${page}` : ""}`;
+        // sessionStorage（外部システム=Reactの状態管理システムの外）との同期のため、Effect内でのsetStateは正当
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setBackUrl(
+          `/?q=${encodeURIComponent(query)}${page ? `&page=${page}` : ""}`
+        );
       }
     } catch (e) {
       console.error("Failed to parse search state:", e);
     }
-
-    return "/";
   }, []);
 
   return (

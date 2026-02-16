@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
-import { BackButton } from "@/components/common/back-button";
+import { BackButton } from "@/components/ui/back-button";
 
 interface ErrorProps {
   error: Error & { digest?: string };

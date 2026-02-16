@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BackButton } from "@/components/common/back-button";
+import { BackButton } from "@/components/ui/back-button";
 
 /**
  * リポジトリが見つからない時の404ページ

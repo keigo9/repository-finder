@@ -1,7 +1,7 @@
 import { Suspense } from "react";
-import { SearchForm } from "@/components/common/search-form";
+import { SearchForm } from "@/components/ui/search-form";
 import { RepositoryList } from "@/components/home/repository-list";
-import { Pagination } from "@/components/common/pagination";
+import { Pagination } from "@/components/ui/pagination";
 import { searchRepositories } from "@/lib/github";
 
 interface HomeProps {
@@ -10,7 +10,6 @@ interface HomeProps {
 
 /**
  * ホームページ（検索ページ）
- * Server Component として実装
  */
 export default async function Home({ searchParams }: HomeProps) {
   const params = await searchParams;
@@ -20,15 +19,7 @@ export default async function Home({ searchParams }: HomeProps) {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="mx-auto max-w-4xl px-4 py-8">
-        {/* ヘッダー */}
-        <header className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
-            GitHub Repository Finder
-          </h1>
-          <p className="mt-2 text-gray-600 dark:text-gray-400">
-            GitHub のリポジトリを検索できるよ!
-          </p>
-        </header>
+        <Header />
 
         {/* 検索フォーム */}
         <div className="mb-8">
@@ -41,6 +32,22 @@ export default async function Home({ searchParams }: HomeProps) {
         </Suspense>
       </div>
     </div>
+  );
+}
+
+/**
+ * ヘッダーコンポーネント
+ */
+function Header() {
+  return (
+    <header className="mb-8 text-center">
+      <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
+        GitHub Repository Finder
+      </h1>
+      <p className="mt-2 text-gray-600 dark:text-gray-400">
+        GitHub のリポジトリを検索できるよ!
+      </p>
+    </header>
   );
 }
 
