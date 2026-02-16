@@ -40,10 +40,12 @@ export default async function RepositoryPage({ params }: RepositoryPageProps) {
               alt={repository.owner.login}
               width={80}
               height={80}
-              className="rounded-full"
+              className="rounded-full shrink-0"
             />
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            <div className="flex-1 min-w-0 overflow-hidden">
+              <h1
+                className="text-3xl font-bold text-gray-900 dark:text-white break-words"
+              >
                 {repository.full_name}
               </h1>
               {repository.description && (
