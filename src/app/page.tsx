@@ -3,9 +3,58 @@ import { SearchForm } from "@/components/ui/search-form";
 import { RepositoryList } from "@/components/home/repository-list";
 import { Pagination } from "@/components/ui/pagination";
 import { searchRepositories } from "@/lib/github";
+import type { Metadata } from "next";
 
 interface HomeProps {
   searchParams: Promise<{ q?: string; page?: string }>;
+}
+
+/**
+ * 動的メタデータ生成
+ * 検索クエリに応じた title と description を生成
+ */
+export async function generateMetadata({
+  searchParams,
+}: HomeProps): Promise<Metadata> {
+  const params = await searchParams;
+  const query = params.q;
+  const page = Number(params.page) || 1;
+
+  if (query) {
+    const pageInfo = page > 1 ? ` - ${page}ページ目` : "";
+    return {
+      title: `"${query}" の検索結果${pageInfo} | GitHub Repository Finder`,
+      description: `GitHubで "${query}" を検索した結果を表示しています。Stars数でソートされたリポジトリ一覧から、最適なプロジェクトを見つけましょう。`,
+      openGraph: {
+        title: `"${query}" の検索結果${pageInfo}`,
+        description: `GitHubで "${query}" を検索した結果を表示しています。`,
+        type: "website",
+      },
+      twitter: {
+        card: "summary",
+        title: `"${query}" の検索結果${pageInfo}`,
+        description: `GitHubで "${query}" を検索した結果を表示しています。`,
+      },
+    };
+  }
+
+  return {
+    title: "GitHub Repository Finder",
+    description:
+      "GitHub APIを使用してリポジトリを検索・詳細表示するウェブアプリケーション",
+    openGraph: {
+      title: "GitHub Repository Finder",
+      description:
+        "GitHub APIを使用してリポジトリを検索・詳細表示するウェブアプリケーション",
+      type: "website",
+    },
+    twitter: {
+      card: "summary",
+      title: "GitHub Repository Finder",
+      description:
+        "GitHub APIを使用してリポジトリを検索・詳細表示するウェブアプリケーション",
+    },
+  };
 }
 
 /**

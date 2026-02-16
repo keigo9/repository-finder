@@ -7,12 +7,70 @@ import {
 } from "@/lib/github";
 import { BackButton } from "@/components/ui/back-button";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 
 interface RepositoryPageProps {
   params: Promise<{
     owner: string;
     repo: string;
   }>;
+}
+
+/**
+ * 動的メタデータ生成
+ * リポジトリ情報に基づいた SEO とOGPタグを設定
+ */
+export async function generateMetadata({
+  params,
+}: RepositoryPageProps): Promise<Metadata> {
+  const { owner, repo } = await params;
+
+  try {
+    const repository = await getRepository(owner, repo);
+
+    return {
+      title: `${repository.full_name} | GitHub Repository Finder`,
+      description:
+        repository.description ||
+        `${repository.full_name} - GitHub上のリポジトリ詳細情報を表示しています。`,
+      openGraph: {
+        title: repository.full_name,
+        description:
+          repository.description ||
+          `${repository.full_name} の詳細情報を表示しています。`,
+        type: "website",
+        images: [
+          {
+            url: repository.owner.avatar_url,
+            width: 460,
+            height: 460,
+            alt: `${repository.owner.login} のアバター`,
+          },
+        ],
+      },
+      twitter: {
+        card: "summary",
+        title: repository.full_name,
+        description:
+          repository.description ||
+          `${repository.full_name} の詳細情報を表示しています。`,
+        images: [repository.owner.avatar_url],
+      },
+    };
+  } catch (error) {
+    // エラー時はデフォルトのメタデータを返す
+    if (error instanceof GitHubNotFoundError) {
+      return {
+        title: "リポジトリが見つかりません | GitHub Repository Finder",
+        description: "指定されたリポジトリが見つかりませんでした。",
+      };
+    }
+
+    return {
+      title: `${owner}/${repo} | GitHub Repository Finder`,
+      description: `${owner}/${repo} の詳細情報を表示しています。`,
+    };
+  }
 }
 
 /**
