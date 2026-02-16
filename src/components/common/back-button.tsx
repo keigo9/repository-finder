@@ -1,28 +1,32 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useMemo } from "react";
 
 /**
  * 検索ページに戻るボタン（検索状態を保持）
  */
 export function BackButton() {
-  const [backUrl, setBackUrl] = useState("/");
+  const backUrl = useMemo(() => {
+    if (typeof window === "undefined") {
+      return "/";
+    }
 
-  useEffect(() => {
     const savedState = sessionStorage.getItem("searchState");
     if (!savedState) {
-      return;
+      return "/";
     }
 
     try {
       const { query, page } = JSON.parse(savedState);
       if (query) {
-        setBackUrl(`/?q=${encodeURIComponent(query)}${page ? `&page=${page}` : ""}`);
+        return `/?q=${encodeURIComponent(query)}${page ? `&page=${page}` : ""}`;
       }
     } catch (e) {
       console.error("Failed to parse search state:", e);
     }
+
+    return "/";
   }, []);
 
   return (

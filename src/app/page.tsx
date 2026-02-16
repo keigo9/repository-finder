@@ -1,7 +1,7 @@
 import { Suspense } from "react";
-import { SearchForm } from "@/components/search-form";
-import { RepositoryList } from "@/components/repository-list";
-import { Pagination } from "@/components/pagination";
+import { SearchForm } from "@/components/common/search-form";
+import { RepositoryList } from "@/components/home/repository-list";
+import { Pagination } from "@/components/common/pagination";
 import { searchRepositories } from "@/lib/github";
 
 interface HomeProps {

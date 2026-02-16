@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { getRepository } from "@/lib/github";
 import { notFound } from "next/navigation";
-import { BackButton } from "./back-button";
+import { BackButton } from "@/components/common/back-button";
 
 interface RepositoryPageProps {
   params: Promise<{
@@ -43,9 +43,7 @@ export default async function RepositoryPage({ params }: RepositoryPageProps) {
               className="rounded-full shrink-0"
             />
             <div className="flex-1 min-w-0 overflow-hidden">
-              <h1
-                className="text-3xl font-bold text-gray-900 dark:text-white break-words"
-              >
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white break-words">
                 {repository.full_name}
               </h1>
               {repository.description && (
