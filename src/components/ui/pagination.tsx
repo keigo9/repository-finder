@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useTransition } from "react";
 
 interface PaginationProps {
   currentPage: number;
@@ -17,7 +17,10 @@ export function Pagination({
   totalCount,
   perPage,
 }: PaginationProps) {
+  const router = useRouter();
   const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+
   // GitHub API は検索結果を最大1000件までしか返さない
   const maxResults = 1000;
   const totalPages = Math.min(
@@ -29,6 +32,12 @@ export function Pagination({
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", page.toString());
     return `/?${params.toString()}`;
+  };
+
+  const handlePageChange = (page: number) => {
+    startTransition(() => {
+      router.push(getHref(page));
+    });
   };
 
   // ページ番号のボタンを生成
@@ -84,12 +93,13 @@ export function Pagination({
           ← 前へ
         </span>
       ) : (
-        <Link
-          href={getHref(currentPage - 1)}
-          className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800"
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={isPending}
+          className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:hover:bg-gray-800"
         >
           ← 前へ
-        </Link>
+        </button>
       )}
 
       {/* ページ番号 */}
@@ -117,13 +127,14 @@ export function Pagination({
               {pageNum}
             </span>
           ) : (
-            <Link
+            <button
               key={pageNum}
-              href={getHref(pageNum)}
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 text-sm font-medium transition-colors hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800"
+              onClick={() => handlePageChange(pageNum)}
+              disabled={isPending}
+              className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-300 text-sm font-medium transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:hover:bg-gray-800"
             >
               {pageNum}
-            </Link>
+            </button>
           );
         })}
       </div>
@@ -134,12 +145,13 @@ export function Pagination({
           次へ →
         </span>
       ) : (
-        <Link
-          href={getHref(currentPage + 1)}
-          className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 dark:border-gray-600 dark:hover:bg-gray-800"
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={isPending}
+          className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:hover:bg-gray-800"
         >
           次へ →
-        </Link>
+        </button>
       )}
     </div>
   );
