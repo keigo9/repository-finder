@@ -2,6 +2,13 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   cacheComponents: true, // Partial Prerendering を有効化 (Next.js 16+)
+  // クライアント側のルータキャッシュ保持時間
+  experimental: {
+    staleTimes: {
+      dynamic: 300, // 動的ページを5分間キャッシュ（検索結果・詳細ページ）
+      static: 180, // 静的ページを3分間キャッシュ
+    },
+  },
   images: {
     remotePatterns: [
       {
